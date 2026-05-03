@@ -4,6 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Silver Monitor · XAG Recyklace</title>
+<!-- OneSignal Push Notifications -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "cf4ec447-ff52-4845-a7c3-867e448d85a4",
+      notifyButton: { enable: false },
+      allowLocalhostAsSecureOrigin: true,
+    });
+  });
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -517,6 +529,12 @@
         localStorage.setItem('sm_registered', 'yes');
         localStorage.setItem('sm_name', data.get('name'));
         localStorage.setItem('sm_email', data.get('email'));
+        // Request push notification permission
+        if (window.OneSignal) {
+          OneSignalDeferred.push(function(OneSignal) {
+            OneSignal.Notifications.requestPermission();
+          });
+        }
         // Show success
         document.getElementById('form-section').style.display = 'none';
         document.getElementById('success-section').style.display = 'flex';
@@ -531,6 +549,11 @@
     });
   });
 </script>
-
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/Silver-Monitor/OneSignalSDKWorker.js', {scope: '/'})
+      .catch(function(e) { console.log('SW:', e); });
+  }
+</script>
 </body>
 </html>
