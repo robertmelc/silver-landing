@@ -465,10 +465,47 @@
 
     <!-- Success state -->
     <div class="success" id="success-section">
-      <div class="success-icon">✅</div>
-      <h2>PŘÍSTUP UDĚLEN</h2>
-      <p>Vaše údaje byly přijaty.<br>Budeme vás kontaktovat na zadaný e-mail.<br>Nyní můžete vstoupit do Silver Monitoru.</p>
-      <a href="https://robertmelc.github.io/Silver-Monitor" class="btn-enter">VSTOUPIT DO MONITORU →</a>
+      <div class="success-icon">📋</div>
+      <h2>REGISTRACE PŘIJATA</h2>
+      <p>Děkujeme za registraci.<br>Pro aktivaci přístupu prosím proveďte platbu.</p>
+
+      <!-- Payment box -->
+      <div style="width:100%;background:#f8fafc;border:1px solid var(--border);border-radius:6px;padding:20px;margin:16px 0;text-align:left;">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--dim);margin-bottom:12px;">PLATEBNÍ INSTRUKCE</div>
+
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;justify-content:space-between;padding:8px 12px;background:#fff;border:1px solid var(--border);border-radius:4px;">
+            <span style="font-family:var(--mono);font-size:10px;color:var(--dim);">Částka</span>
+            <span style="font-family:var(--mono);font-size:14px;color:var(--accent);font-weight:bold;">99 Kč / měsíc</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#fff;border:1px solid var(--border);border-radius:4px;">
+            <span style="font-family:var(--mono);font-size:10px;color:var(--dim);">Číslo účtu</span>
+            <span style="font-family:var(--mono);font-size:13px;color:#1a2a3a;font-weight:bold;" id="bank-account">DOPLNIT</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#fff;border:1px solid var(--border);border-radius:4px;">
+            <span style="font-family:var(--mono);font-size:10px;color:var(--dim);">Variabilní symbol</span>
+            <span style="font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:bold;" id="vs-number">–</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 12px;background:#fff;border:1px solid var(--border);border-radius:4px;">
+            <span style="font-family:var(--mono);font-size:10px;color:var(--dim);">Zpráva pro příjemce</span>
+            <span style="font-family:var(--mono);font-size:11px;color:#1a2a3a;">Silver Monitor</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 12px;background:#fff;border:1px solid var(--border);border-radius:4px;">
+            <span style="font-family:var(--mono);font-size:10px;color:var(--dim);">IBAN</span>
+            <span style="font-family:var(--mono);font-size:11px;color:#1a2a3a;" id="iban-number">DOPLNIT</span>
+          </div>
+        </div>
+
+        <div style="margin-top:14px;padding:10px 12px;background:rgba(0,136,102,0.06);border:1px solid rgba(0,136,102,0.2);border-radius:4px;font-family:var(--mono);font-size:9px;color:var(--dim);line-height:1.7;">
+          Po přijetí platby vám zašleme přístupový kód na e-mail do <span style="color:var(--accent);">24 hodin</span>.<br>
+          Kód zadáte v Silver Monitoru pro odemčení signálů.
+        </div>
+      </div>
+
+      <a href="https://robertmelc.github.io/Silver-Monitor" class="btn-enter" style="margin-top:4px;">
+        VSTOUPIT DO MONITORU →
+      </a>
+      <p style="font-size:9px;margin-top:10px;">Signály uvidíte po aktivaci přístupového kódu.</p>
     </div>
   </div>
 
@@ -525,16 +562,31 @@
     })
     .then(function(res) {
       if (res.ok) {
-        // Save to localStorage
         localStorage.setItem('sm_registered', 'yes');
         localStorage.setItem('sm_name', data.get('name'));
         localStorage.setItem('sm_email', data.get('email'));
-        // Request push notification permission
-        if (window.OneSignal) {
+
+        // Generate unique VS from timestamp
+        var vs = Date.now().toString().slice(-8);
+        localStorage.setItem('sm_vs', vs);
+
+        // Show VS in payment box
+        var vsEl = document.getElementById('vs-number');
+        if (vsEl) vsEl.textContent = vs;
+
+        // Bank details - DOPLNIT
+        var bankEl = document.getElementById('bank-account');
+        if (bankEl) bankEl.textContent = 'DOPLNIT / 0800';
+        var ibanEl = document.getElementById('iban-number');
+        if (ibanEl) ibanEl.textContent = 'CZ00 0000 0000 0000 0000 0000';
+
+        // Request push permission
+        if (window.OneSignalDeferred) {
           OneSignalDeferred.push(function(OneSignal) {
             OneSignal.Notifications.requestPermission();
           });
         }
+
         // Show success
         document.getElementById('form-section').style.display = 'none';
         document.getElementById('success-section').style.display = 'flex';
